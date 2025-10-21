@@ -20,7 +20,6 @@ export default function WelcomeScreen() {
   const primaryScale = useSharedValue(1); 
   const secondaryScale = useSharedValue(1); 
 
-  // --- Запускаємо всі анімації ---
   useEffect(() => {
     gradientProgress.value = withRepeat(
       withTiming(1, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
@@ -28,13 +27,12 @@ export default function WelcomeScreen() {
       true
     );
     
-    // 1. ЗБІЛЬШУЄМО ЗАГАЛЬНИЙ ЧАС АНІМАЦІЇ до 3 секунд
     introProgress.value = withTiming(1, { 
-      duration: 3000, // <--- ЗМІНЕНО (було 2000)
+      duration: 3000, 
       easing: Easing.out(Easing.ease) 
     });
 
-  }, []); // Запускається один раз
+  }, []); 
 
   const animatedGradientProps = useAnimatedProps(() => {
     return {
@@ -43,56 +41,48 @@ export default function WelcomeScreen() {
     };
   });
 
-  // --- Поетапні анімовані стилі ---
-
-  // 2. Анімація для заголовка: 0% - 33% (перша секунда)
   const titleAnimatedStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       introProgress.value,
-      [0, 0.33], // <--- ЗМІНЕНО 
+      [0, 0.33], 
       [0, 1]
     );
     const scale = interpolate(
       introProgress.value,
-      [0, 0.33], // <--- ЗМІНЕНО
+      [0, 0.33], 
       [0.98, 1]
     );
     return { opacity, transform: [{ scale }] };
   });
 
-  // 3. Анімація для ПІДЗАГОЛОВКА: 33% - 66% (друга секунда)
   const subtitleAnimatedStyle = useAnimatedStyle(() => {
-    // Починаємо з 0.33, коли заголовок вже з'явився
     const opacity = interpolate(
       introProgress.value,
-      [0.33, 0.66], // <--- ЗМІНЕНО
+      [0.33, 0.66], 
       [0, 1]
     );
     const translateY = interpolate(
       introProgress.value,
-      [0.33, 0.66], // <--- ЗМІНЕНО
+      [0.33, 0.66],
       [10, 0]
     );
     return { opacity, transform: [{ translateY }] };
   });
 
-  // 4. Анімація для КНОПОК: 66% - 100% (третя секунда)
   const footerAnimatedStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       introProgress.value,
-      [0.66, 1], // <--- ЗМІНЕНО
+      [0.66, 1],
       [0, 1]
     );
     const translateY = interpolate(
       introProgress.value,
-      [0.66, 1], // <--- ЗМІНЕНО
+      [0.66, 1], 
       [20, 0]
     );
     return { opacity, transform: [{ translateY }] };
   });
 
-
-  // --- Анімація натискання кнопок (без змін) ---
   const primaryAnimatedStyle = useAnimatedStyle(() => {
     return { transform: [{ scale: primaryScale.value }] };
   });
@@ -122,7 +112,6 @@ export default function WelcomeScreen() {
       </View>
 
       <Animated.View style={[styles.footer, footerAnimatedStyle]}>
-        {/* ... (код кнопок без змін) ... */}
         <Pressable
           onPress={() => router.push('/register')}
           onPressIn={onPrimaryPressIn}
@@ -146,7 +135,6 @@ export default function WelcomeScreen() {
   );
 }
 
-// --- Стилі (без змін) ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
