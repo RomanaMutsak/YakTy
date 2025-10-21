@@ -1,24 +1,33 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { SplashScreen, Stack } from 'expo-router';
+import React, { useEffect } from 'react';
+// Завантажувач шрифтів та самі шрифти
+import { Nunito_300Light, Nunito_400Regular, Nunito_600SemiBold, useFonts } from '@expo-google-fonts/nunito';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+// Ця команда не дає сплеш-скріну зникнути автоматично
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const [fontsLoaded, fontError] = useFonts({
+    Nunito_300Light,
+    Nunito_400Regular,
+    Nunito_600SemiBold,
+  });
+
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Stack>
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="register" options={{ title: 'Реєстрація' }} />
+      <Stack.Screen name="login" options={{ title: 'Вхід' }} />
+    </Stack>
   );
 }
