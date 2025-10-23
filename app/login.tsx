@@ -1,21 +1,30 @@
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Keyboard,
-    KeyboardAvoidingView, Platform, Pressable, ScrollView,
-    StyleSheet, Text, TextInput,
-    TouchableWithoutFeedback,
-    View
+  Alert,
+  Keyboard,
+  KeyboardAvoidingView, Platform, Pressable, ScrollView,
+  StyleSheet, Text, TextInput,
+  TouchableWithoutFeedback,
+  View
 } from 'react-native';
 import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 import { supabase } from '../supabaseConfig';
+
+const COLORS = {
+  background: '#FDF8F0',
+  textPrimary: '#795548',
+  textSecondary: 'rgba(121, 85, 72, 0.6)',
+  inputBackground: 'rgba(121, 85, 72, 0.08)',
+  inputFocusedBorder: '#A1887F',
+  buttonBackground: '#8D6E63',
+  buttonText: '#FDF8F0',
+};
 
 export default function LoginScreen() {
   const scale = useSharedValue(1);
@@ -43,31 +52,35 @@ export default function LoginScreen() {
     if (data.user) {
       console.log('Успішний вхід:', data.user.id);
       Alert.alert('Успіх!', 'Ви увійшли в систему.');
-      // router.replace('/home'); // Розкоментую, коли буде /home
+      // router.replace('/home');
     }
   };
 
   return (
-    <LinearGradient
-      colors={['#f7b733', '#fc4a1a']}
-      style={styles.container}
-    >
+    <View style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ScrollView 
+          <ScrollView
             contentContainerStyle={styles.scrollView}
             keyboardShouldPersistTaps="handled"
           >
+            <Ionicons
+              name="heart-outline" 
+              size={40}
+              color={COLORS.textPrimary}
+              style={{ marginBottom: 20 }}
+            />
+
             <Text style={styles.title}>Раді бачити знову!</Text>
             <Text style={styles.subtitle}>Як ти сьогодні?</Text>
-            
-            <TextInput
+
+             <TextInput
               style={[styles.input, focusedInput === 'email' && styles.inputFocused]}
               placeholder="Email"
-              placeholderTextColor="#fccb8a"
+              placeholderTextColor={COLORS.textSecondary}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -75,12 +88,11 @@ export default function LoginScreen() {
               onFocus={() => setFocusedInput('email')}
               onBlur={() => setFocusedInput(null)}
             />
-            
             <View style={[styles.inputContainer, focusedInput === 'password' && styles.inputFocused]}>
               <TextInput
                 style={styles.inputField}
                 placeholder="Пароль"
-                placeholderTextColor="#fccb8a"
+                placeholderTextColor={COLORS.textSecondary}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!isPasswordVisible}
@@ -88,14 +100,13 @@ export default function LoginScreen() {
                 onBlur={() => setFocusedInput(null)}
               />
               <Pressable onPress={() => setIsPasswordVisible(!isPasswordVisible)} style={styles.eyeIcon}>
-                <Ionicons 
-                  name={isPasswordVisible ? "eye-outline" : "eye-off-outline"} 
-                  size={24} 
-                  color="#fccb8a" 
+                <Ionicons
+                  name={isPasswordVisible ? "eye-outline" : "eye-off-outline"}
+                  size={22}
+                  color={COLORS.textSecondary}
                 />
               </Pressable>
             </View>
-
             <Pressable
               onPress={handleLogin}
               onPressIn={onPressIn}
@@ -112,13 +123,14 @@ export default function LoginScreen() {
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.background,
   },
   keyboardView: {
     flex: 1,
@@ -130,30 +142,30 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 32,
-    fontFamily: 'Nunito_300Light',
-    color: 'white',
-    marginBottom: 10,
+    fontSize: 30,
+    fontFamily: 'Nunito_400Regular',
+    color: COLORS.textPrimary,
+    marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: 'Nunito_400Regular',
-    color: 'rgba(255, 255, 255, 0.8)',
-    marginBottom: 40,
+    color: COLORS.textSecondary,
+    marginBottom: 35,
     textAlign: 'center',
   },
   input: {
     width: '90%',
     height: 50,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 25,
+    backgroundColor: COLORS.inputBackground,
+    borderRadius: 15,
     paddingHorizontal: 20,
     fontFamily: 'Nunito_400Regular',
     fontSize: 16,
-    color: 'white',
+    color: COLORS.textPrimary,
     marginBottom: 15,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: 'transparent',
   },
   inputContainer: {
@@ -161,48 +173,55 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '90%',
     height: 50,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 25,
+    backgroundColor: COLORS.inputBackground,
+    borderRadius: 15,
     marginBottom: 15,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: 'transparent',
   },
   inputField: {
     flex: 1,
     height: '100%',
-    paddingHorizontal: 20,
+    paddingLeft: 20,
+    paddingRight: 5,
     fontFamily: 'Nunito_400Regular',
     fontSize: 16,
-    color: 'white',
+    color: COLORS.textPrimary,
   },
   eyeIcon: {
     paddingHorizontal: 15,
   },
   inputFocused: {
-    borderColor: 'white',
+    borderColor: COLORS.inputFocusedBorder,
+    backgroundColor: 'white',
   },
   button: {
-    backgroundColor: 'white',
+    backgroundColor: COLORS.buttonBackground,
     width: 300,
-    paddingVertical: 15,
-    borderRadius: 30,
+    paddingVertical: 14,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   buttonText: {
     fontSize: 18,
-    color: '#fc4a1a',
+    color: COLORS.buttonText,
     fontFamily: 'Nunito_600SemiBold',
     textAlign: 'center',
   },
   linkButton: {
     marginTop: 25,
-    padding: 10,
+    padding: 5,
   },
   linkText: {
-    fontSize: 16,
-    color: 'white',
+    fontSize: 15,
+    color: COLORS.textSecondary,
     fontFamily: 'Nunito_400Regular',
   },
 });

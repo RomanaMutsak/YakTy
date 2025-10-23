@@ -1,85 +1,54 @@
-import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import React, { useEffect } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
-    Easing,
-    interpolate,
-    useAnimatedProps,
-    useAnimatedStyle,
-    useSharedValue,
-    withRepeat,
-    withTiming,
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 
-const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
+const COLORS = {
+  background: '#FDF8F0',
+  textPrimary: '#795548',
+  textSecondary: 'rgba(121, 85, 72, 0.6)',
+  inputBackground: 'rgba(121, 85, 72, 0.08)',
+  inputFocusedBorder: '#A1887F',
+  buttonBackground: '#8D6E63',
+  buttonText: '#FDF8F0',
+};
 
 export default function WelcomeScreen() {
-  const gradientProgress = useSharedValue(0);
-  const introProgress = useSharedValue(0); 
-  const primaryScale = useSharedValue(1); 
-  const secondaryScale = useSharedValue(1); 
+  const introProgress = useSharedValue(0);
+  const primaryScale = useSharedValue(1);
+  const secondaryScale = useSharedValue(1);
 
-  useEffect(() => {
-    gradientProgress.value = withRepeat(
-      withTiming(1, { duration: 4000, easing: Easing.inOut(Easing.ease) }),
-      -1,
-      true
-    );
-    
-    introProgress.value = withTiming(1, { 
-      duration: 3000, 
-      easing: Easing.out(Easing.ease) 
-    });
-
-  }, []); 
-
-  const animatedGradientProps = useAnimatedProps(() => {
-    return {
-      start: { x: gradientProgress.value * 0.75, y: 0 },
-      end: { x: 1 - gradientProgress.value * 0.75, y: 1 },
-    };
-  });
+  useFocusEffect(
+    useCallback(() => {
+      introProgress.value = 0; 
+      introProgress.value = withTiming(1, { 
+        duration: 2500, 
+        easing: Easing.out(Easing.ease)
+      });
+    }, [])
+  );
 
   const titleAnimatedStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(
-      introProgress.value,
-      [0, 0.33], 
-      [0, 1]
-    );
-    const scale = interpolate(
-      introProgress.value,
-      [0, 0.33], 
-      [0.98, 1]
-    );
-    return { opacity, transform: [{ scale }] };
+    const opacity = interpolate(introProgress.value, [0, 0.4], [0, 1]);
+    const translateY = interpolate(introProgress.value, [0, 0.4], [5, 0]); 
+    return { opacity, transform: [{ translateY }] }; 
   });
 
   const subtitleAnimatedStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(
-      introProgress.value,
-      [0.33, 0.66], 
-      [0, 1]
-    );
-    const translateY = interpolate(
-      introProgress.value,
-      [0.33, 0.66],
-      [10, 0]
-    );
+    const opacity = interpolate(introProgress.value, [0.4, 0.7], [0, 1]); 
+    const translateY = interpolate(introProgress.value, [0.4, 0.7], [10, 0]); 
     return { opacity, transform: [{ translateY }] };
   });
 
   const footerAnimatedStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(
-      introProgress.value,
-      [0.66, 1],
-      [0, 1]
-    );
-    const translateY = interpolate(
-      introProgress.value,
-      [0.66, 1], 
-      [20, 0]
-    );
+    const opacity = interpolate(introProgress.value, [0.7, 1], [0, 1]); 
+    const translateY = interpolate(introProgress.value, [0.7, 1], [20, 0]); 
     return { opacity, transform: [{ translateY }] };
   });
 
@@ -96,28 +65,25 @@ export default function WelcomeScreen() {
   const onSecondaryPressOut = () => { secondaryScale.value = withTiming(1, { duration: 100 }); };
 
   return (
-    <AnimatedLinearGradient
-      colors={['#f7b733', '#fc4a1a']}
-      style={styles.container}
-      animatedProps={animatedGradientProps}
-    >
+    <View style={styles.container}>
       <View style={styles.mainContent}>
+        {/* 6. Прибрали іконку */}
         <Animated.Text style={[styles.title, titleAnimatedStyle]}>
           Як ти?
         </Animated.Text>
-        
         <Animated.Text style={[styles.subtitle, subtitleAnimatedStyle]}>
           Тут ти можеш бути чесним
         </Animated.Text>
       </View>
 
       <Animated.View style={[styles.footer, footerAnimatedStyle]}>
+        {/* ... (код кнопок без змін) ... */}
         <Pressable
           onPress={() => router.push('/register')}
           onPressIn={onPrimaryPressIn}
           onPressOut={onPrimaryPressOut}
         >
-          <Animated.View style={[styles.buttonPrimary, primaryAnimatedStyle]}> 
+          <Animated.View style={[styles.buttonPrimary, primaryAnimatedStyle]}>
             <Text style={styles.buttonPrimaryText}>Зареєструватися</Text>
           </Animated.View>
         </Pressable>
@@ -126,18 +92,19 @@ export default function WelcomeScreen() {
           onPressIn={onSecondaryPressIn}
           onPressOut={onSecondaryPressOut}
         >
-          <Animated.View style={[styles.buttonSecondary, secondaryAnimatedStyle]}> 
+          <Animated.View style={[styles.buttonSecondary, secondaryAnimatedStyle]}>
             <Text style={styles.buttonSecondaryText}>Увійти</Text>
           </Animated.View>
         </Pressable>
       </Animated.View>
-    </AnimatedLinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.background,
   },
   mainContent: {
     flex: 1,
@@ -152,48 +119,52 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 50, 
+    fontSize: 48,
     fontFamily: 'Nunito_300Light',
-    color: 'white',
+    color: COLORS.textPrimary,
     textAlign: 'center',
-    marginBottom: 10, 
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 20, 
+    fontSize: 18,
     fontFamily: 'Nunito_400Regular',
-    color: 'rgba(255, 255, 255, 0.8)', 
+    color: COLORS.textSecondary,
     textAlign: 'center',
-    marginBottom: 30, 
+    marginBottom: 30,
   },
   buttonPrimary: {
-    backgroundColor: 'white',
+    backgroundColor: COLORS.buttonBackground,
     width: 300,
-    paddingVertical: 15,
-    borderRadius: 30,
-    overflow: 'hidden',
+    paddingVertical: 14,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   buttonPrimaryText: {
     fontSize: 18,
-    color: '#fc4a1a',
+    color: COLORS.buttonText,
     fontFamily: 'Nunito_600SemiBold',
     textAlign: 'center',
   },
   buttonSecondary: {
     width: 300,
-    paddingVertical: 15,
-    borderRadius: 30,
+    paddingVertical: 14,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
-    borderColor: 'white',
+    borderColor: COLORS.buttonBackground,
     borderWidth: 1.5,
   },
   buttonSecondaryText: {
     fontSize: 18,
-    color: 'white',
-    fontFamily: 'Nunito_400Regular',
+    color: COLORS.buttonBackground,
+    fontFamily: 'Nunito_600SemiBold',
     textAlign: 'center',
   },
 });
