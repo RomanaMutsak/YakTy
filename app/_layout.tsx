@@ -28,6 +28,8 @@ export default function RootLayout() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="register" options={{ title: 'Реєстрація' }} />
       <Stack.Screen name="login" options={{ title: 'Вхід' }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> 
+      <Stack.Screen name="addEntry" options={{ title: 'Новий Запис' }} />
     </Stack>
   );
 }

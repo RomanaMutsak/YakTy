@@ -59,6 +59,7 @@ export default function RegisterScreen() {
       .insert([{ id: data.user.id, username: name }]);
     if (profileError) { Alert.alert('Помилка профілю', profileError.message); return; }
     Alert.alert('Успіх!', 'Акаунт успішно створено.');
+    router.replace('/(tabs)/home'); 
   };
 
   return (

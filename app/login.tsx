@@ -52,7 +52,7 @@ export default function LoginScreen() {
     if (data.user) {
       console.log('Успішний вхід:', data.user.id);
       Alert.alert('Успіх!', 'Ви увійшли в систему.');
-      // router.replace('/home');
+      router.replace('/(tabs)/home'); 
     }
   };
 
