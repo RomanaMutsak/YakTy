@@ -14,10 +14,8 @@ interface StarRatingProps {
 }
 
 const StarRating: React.FC<StarRatingProps> = ({ rating, onRate, size = 36 }) => {
-  
-  // Функція, яка викликається при натисканні на зірку
   const handleRate = (starIndex: number) => {
-    if (!onRate) return; // Не робити нічого, якщо це "read-only" (статистика)
+    if (!onRate) return; 
 
     const halfStar = starIndex - 0.5;
     const fullStar = starIndex;
@@ -36,7 +34,6 @@ const StarRating: React.FC<StarRatingProps> = ({ rating, onRate, size = 36 }) =>
       {[1, 2, 3, 4, 5].map((starIndex) => {
         let iconName: 'star' | 'star-half' | 'star-outline' = 'star-outline';
         
-        // Логіка відображення (для 4.2, 4.5, 4.8 тощо)
         if (rating >= starIndex) {
           iconName = 'star'; // Повна зірка
         } else if (rating >= starIndex - 0.5) {
