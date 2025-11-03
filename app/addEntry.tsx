@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import {
   Alert,
   Keyboard,
@@ -34,6 +34,50 @@ const formatDateTime = (date: Date) => {
   return `${date.toLocaleDateString('uk-UA', optionsDate)}, ${date.toLocaleTimeString('uk-UA', optionsTime)}`;
 };
 
+const questionPools = {
+  mood: [
+    "Наскільки спокійно ти почуваєшся всередині?",
+    "Який твій загальний емоційний фон сьогодні?",
+    "Наскільки гармонійно ти себе відчуваєш?",
+    "Наскільки легко тобі сьогодні було відпускати контроль?",
+    "Як би ти оцінив(ла) свій настрій?",
+  ],
+  energy: [
+    "Наскільки сповненим(ою) сил ти себе відчуваєш?",
+    "Як би ти оцінив(ла) свій рівень енергії?",
+    "Чи відчуваєш ти втому чи бадьорість?",
+    "Чи відчував(ла) ти сьогодні контакт зі своїми емоціями?",
+    "Чи вдавалося тобі помічати дрібниці, які приносять радість?",
+  ],
+  sleepQuality: [
+    "Наскільки добре ти спав(ла)?",
+    "Наскільки легко тобі було заснути сьогодні вночі?",
+    "Наскільки твій розум був спокійним перед сном?",
+    "Як би ти оцінив(ла) якість свого сну?",
+    "Наскільки глибоким і спокійним був твій сон?",
+  ],
+  anxiety: [
+    "Наскільки сильною була тривога чи неспокій?",
+    "Чи вдалося тобі зберегти спокій протягом дня?",
+    "Як би ти оцінив(ла) свій рівень стресу?",
+    "Чи відчуваєш ти довіру до життя зараз?",
+    "Чи зміг(ла) ти знайти хоча б короткий момент повного спокою?",
+  ],
+  gratitude: [
+    "Наскільки легко тобі згадати моменти вдячності за день?",
+    "Чи відчуваєш ти вдячність за сьогоднішній день?",
+    "Чи були сьогодні моменти, які змусили тебе посміхнутися?",
+    "Наскільки ти приймаєш себе таким(ою), яким(ою) є?",
+    "Чи можеш ти бути добрим(ою) до себе, навіть коли щось не виходить?",
+  ],
+};
+
+const getRandomQuestion = (metric: keyof typeof questionPools) => {
+  const pool = questionPools[metric];
+  return pool[Math.floor(Math.random() * pool.length)];
+};
+
+
 export default function AddEntryScreen() {
   const [entryText, setEntryText] = useState('');
   const [isTextSaved, setIsTextSaved] = useState(false);
@@ -45,14 +89,44 @@ export default function AddEntryScreen() {
   const [sleepQuality, setSleepQuality] = useState(0);
   const [gratitude, setGratitude] = useState(0);
 
+  const [moodQuestion, setMoodQuestion] = useState('');
+  const [energyQuestion, setEnergyQuestion] = useState('');
+  const [sleepQuestion, setSleepQuestion] = useState('');
+  const [anxietyQuestion, setAnxietyQuestion] = useState('');
+  const [gratitudeQuestion, setGratitudeQuestion] = useState('');
+
+
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const onPressIn = () => { scale.value = withTiming(0.95, { duration: 100 }); };
   const onPressOut = () => { scale.value = withTiming(1, { duration: 100 }); };
 
-  useEffect(() => {
-    setCurrentDateTime(new Date());
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const now = new Date();
+      setCurrentDateTime(now);
+      
+      setMoodQuestion(getRandomQuestion('mood'));
+      setEnergyQuestion(getRandomQuestion('energy'));
+
+      const morning = now.getHours() < 14;
+      if (morning) {
+        setSleepQuestion(getRandomQuestion('sleepQuality'));
+      } else {
+        setAnxietyQuestion(getRandomQuestion('anxiety'));
+        setGratitudeQuestion(getRandomQuestion('gratitude'));
+      }
+
+      setEntryText('');
+      setIsTextSaved(false);
+      setMood(0);
+      setAnxiety(0);
+      setEnergy(0);
+      setSleepQuality(0);
+      setGratitude(0);
+
+    }, [])
+  );
 
   const isMorning = currentDateTime.getHours() < 14;
 
@@ -110,6 +184,7 @@ export default function AddEntryScreen() {
     }
   };
 
+
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView
@@ -151,25 +226,25 @@ export default function AddEntryScreen() {
               <View style={styles.slidersContainer}>
                 <Text style={styles.promptText}>Оціни свій стан:</Text>
 
-                <Text style={styles.sliderLabel}>Наскільки спокійно ти почуваєшся всередині?</Text>
+                <Text style={styles.sliderLabel}>{moodQuestion}</Text>
                 <StarRating rating={mood} onRate={setMood} />
 
-                <Text style={styles.sliderLabel}>Наскільки сповненим(ою) сил ти себе відчуваєш?</Text>
+                <Text style={styles.sliderLabel}>{energyQuestion}</Text>
                 <StarRating rating={energy} onRate={setEnergy} />
 
                 {isMorning && (
                   <>
-                    <Text style={styles.sliderLabel}>Наскільки добре ти ти спав(ла)?</Text>
+                    <Text style={styles.sliderLabel}>{sleepQuestion}</Text>
                     <StarRating rating={sleepQuality} onRate={setSleepQuality} />
                   </>
                 )}
 
                 {!isMorning && (
                   <>
-                    <Text style={styles.sliderLabel}>Наскільки сильною була тривога чи неспокій?</Text>
+                    <Text style={styles.sliderLabel}>{anxietyQuestion}</Text>
                     <StarRating rating={anxiety} onRate={setAnxiety} />
 
-                    <Text style={styles.sliderLabel}>Наскільки легко тобі згадати моменти вдячності за день?</Text>
+                    <Text style={styles.sliderLabel}>{gratitudeQuestion}</Text>
                     <StarRating rating={gratitude} onRate={setGratitude} />
                   </>
                 )}
@@ -193,7 +268,6 @@ export default function AddEntryScreen() {
   );
 }
 
-// Стилі
 const styles = StyleSheet.create({
   container: {
     flex: 1,
