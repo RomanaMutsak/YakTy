@@ -5,15 +5,25 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Keyboard,
   Pressable,
   StyleSheet,
   Text,
-  View
+  TextInput,
+  View,
 } from 'react-native';
+// 1. Імпортуємо 'Animated' з 'react-native-reanimated'
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import StarRating from '../../components/StarRating';
 import { supabase } from '../../supabaseConfig';
 
+// ... (Палітра COLORS та інтерфейс Entry - без змін)
 const COLORS = {
   background: '#FDF8F0',
   textPrimary: '#795548',
@@ -21,8 +31,9 @@ const COLORS = {
   inputBackground: 'rgba(121, 85, 72, 0.08)',
   accent: '#A1887F',
   error: '#D32F2F',
+  buttonBackground: '#8D6E63',
+  buttonText: '#FDF8F0',
 };
-
 interface Entry {
   id: string;
   created_at: string;
@@ -34,17 +45,62 @@ interface Entry {
   anxiety?: number | null;
   gratitude?: number | null;
 }
+// ... (Кінець блоку без змін)
 
-const EntryCard = ({ item, onDelete }: { item: Entry, onDelete: (id: string) => void }) => {
+
+// --- 2. ОНОВЛЕНО: Компонент AnimatedIconButton ---
+// (Ми анімуємо 'Pressable', а не 'View', щоб уникнути помилки)
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const AnimatedIconButton = ({ onPress, iconName, color }: {
+  onPress: () => void;
+  iconName: React.ComponentProps<typeof Ionicons>['name'];
+  color: string;
+}) => {
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withTiming(0.8, { duration: 100 });
+  };
+  const handlePressOut = () => {
+    scale.value = withSpring(1);
+  };
+
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      style={[styles.iconButton, animatedStyle]}
+    >
+      <Ionicons name={iconName} size={22} color={color} />
+    </AnimatedPressable>
+  );
+};
+
+
+// --- 3. Оновлюємо компонент EntryCard ---
+const MAX_NOTE_LENGTH = 120; // <--- Ліміт символів
+
+const EntryCard = ({ item, onDelete, onUpdateNote }: { 
+  item: Entry, 
+  onDelete: (id: string) => void,
+  onUpdateNote: (id: string, newNote: string) => void,
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedNote, setEditedNote] = useState(item.note);
+
   const date = new Date(item.created_at);
-  const formattedDate = date.toLocaleDateString('uk-UA', {
-    day: 'numeric', month: 'long', year: 'numeric'
-  });
-  const formattedTime = date.toLocaleTimeString('uk-UA', {
-    hour: '2-digit', minute: '2-digit'
-  });
+  const formattedDate = date.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' });
+  const formattedTime = date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
   const isMorning = item.entry_type === 'morning';
 
+  // Функція видалення (вона вже була, але тепер вона 100% тут)
   const confirmDelete = () => {
     Alert.alert(
       "Видалити запис?",
@@ -56,6 +112,92 @@ const EntryCard = ({ item, onDelete }: { item: Entry, onDelete: (id: string) => 
     );
   };
 
+  // ... (Логіка handleSaveEdit та handleCancelEdit - без змін)
+  const handleSaveEdit = () => {
+    Keyboard.dismiss();
+    if (editedNote.trim() === item.note) {
+      setIsEditing(false);
+      return;
+    }
+    onUpdateNote(item.id, editedNote.trim());
+    setIsEditing(false);
+  };
+  const handleCancelEdit = () => {
+    Keyboard.dismiss();
+    setEditedNote(item.note);
+    setIsEditing(false);
+  };
+
+  // 4. ОНОВЛЕНО: Рендеримо текст (повертаємо 'substring')
+  const renderNote = () => {
+    if (isEditing) {
+      return (
+        <TextInput
+          style={styles.noteInput}
+          value={editedNote}
+          onChangeText={setEditedNote}
+          multiline
+          autoFocus
+        />
+      );
+    }
+    
+    // Перевіряємо, чи текст "довгий"
+    const isLongText = item.note.length > MAX_NOTE_LENGTH;
+
+    if (isLongText && !isExpanded) {
+      return (
+        <>
+          {/* Показуємо лише перші N символів */}
+          <Text style={styles.cardNote}>
+            {item.note.substring(0, MAX_NOTE_LENGTH)}...
+          </Text>
+          <Pressable onPress={() => setIsExpanded(true)}>
+            <Text style={styles.moreButton}>Більше...</Text>
+          </Pressable>
+        </>
+      );
+    }
+
+    // Повний текст (або короткий)
+    return (
+      <>
+        <Text style={styles.cardNote}>{item.note}</Text>
+        {/* Кнопка "Згорнути" з'являється, лише якщо текст був довгий */}
+        {isLongText && isExpanded && (
+          <Pressable onPress={() => setIsExpanded(false)}>
+            <Text style={styles.moreButton}>Згорнути</Text>
+          </Pressable>
+        )}
+      </>
+    );
+  };
+  
+  // ... (renderRatingsOrControls - без змін)
+  const renderRatingsOrControls = () => {
+    if (isEditing) {
+      return (
+        <View style={styles.editControls}>
+          <Pressable style={styles.cancelButton} onPress={handleCancelEdit}>
+            <Text style={styles.cancelButtonText}>Скасувати</Text>
+          </Pressable>
+          <Pressable style={styles.saveButton} onPress={handleSaveEdit}>
+            <Text style={styles.saveButtonText}>Зберегти</Text>
+          </Pressable>
+        </View>
+      );
+    }
+    return (
+      <View style={styles.ratingsContainer}>
+        <View style={styles.ratingItem}><Text style={styles.ratingLabel}>Настрій</Text><StarRating rating={item.mood} size={20} /></View>
+        <View style={styles.ratingItem}><Text style={styles.ratingLabel}>Енергія</Text><StarRating rating={item.energy} size={20} /></View>
+        {isMorning && item.sleep_quality != null && (<View style={styles.ratingItem}><Text style={styles.ratingLabel}>Якість сну</Text><StarRating rating={item.sleep_quality} size={20} /></View>)}
+        {!isMorning && item.anxiety != null && (<View style={styles.ratingItem}><Text style={styles.ratingLabel}>Тривожність</Text><StarRating rating={item.anxiety} size={20} /></View>)}
+        {!isMorning && item.gratitude != null && (<View style={styles.ratingItem}><Text style={styles.ratingLabel}>Вдячність</Text><StarRating rating={item.gratitude} size={20} /></View>)}
+      </View>
+    );
+  };
+
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
@@ -63,72 +205,49 @@ const EntryCard = ({ item, onDelete }: { item: Entry, onDelete: (id: string) => 
           <Text style={styles.cardDate}>{formattedDate}</Text>
           <Text style={styles.cardTime}>{formattedTime} ({isMorning ? 'Ранок' : 'Вечір'})</Text>
         </View>
-        <Pressable onPress={confirmDelete} style={styles.deleteButton}>
-          <Ionicons name="trash-outline" size={22} color={COLORS.textSecondary} />
-        </Pressable>
+        <View style={styles.iconContainer}>
+          {!isEditing && (
+            <>
+              {/* 5. Використовуємо нові анімовані кнопки */}
+              <AnimatedIconButton
+                onPress={() => setIsEditing(true)}
+                iconName="pencil-outline"
+                color={COLORS.textSecondary}
+              />
+              <AnimatedIconButton
+                onPress={confirmDelete}
+                iconName="trash-outline"
+                color={COLORS.textSecondary}
+              />
+            </>
+          )}
+        </View>
       </View>
 
-      <Text style={styles.cardNote}>{item.note}</Text>
-
+      {renderNote()}
       <View style={styles.divider} />
-
-      <View style={styles.ratingsContainer}>
-        <View style={styles.ratingItem}>
-          <Text style={styles.ratingLabel}>Настрій</Text>
-          <StarRating rating={item.mood} size={20} />
-        </View>
-        <View style={styles.ratingItem}>
-          <Text style={styles.ratingLabel}>Енергія</Text>
-          <StarRating rating={item.energy} size={20} />
-        </View>
-        
-        {isMorning && item.sleep_quality != null && (
-          <View style={styles.ratingItem}>
-            <Text style={styles.ratingLabel}>Якість сну</Text>
-            <StarRating rating={item.sleep_quality} size={20} />
-          </View>
-        )}
-        {!isMorning && item.anxiety != null && (
-          <View style={styles.ratingItem}>
-            <Text style={styles.ratingLabel}>Тривожність</Text>
-            <StarRating rating={item.anxiety} size={20} />
-          </View>
-        )}
-        {!isMorning && item.gratitude != null && (
-          <View style={styles.ratingItem}>
-            <Text style={styles.ratingLabel}>Вдячність</Text>
-            <StarRating rating={item.gratitude} size={20} />
-          </View>
-        )}
-      </View>
+      {renderRatingsOrControls()}
     </View>
   );
 };
 
 
 export default function EntriesScreen() {
+  // ... (весь код EntriesScreen залишається БЕЗ ЗМІН)
   const [loading, setLoading] = useState(true);
   const [entries, setEntries] = useState<Entry[]>([]);
 
   const fetchEntries = useCallback(async () => {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      router.replace('/login');
-      return;
-    }
-
+    if (!user) { router.replace('/login'); return; }
     const { data, error } = await supabase
       .from('daily_entries')
       .select('*') 
       .eq('user_id', user.id)
       .order('created_at', { ascending: false }); 
-
-    if (error) {
-      Alert.alert('Помилка завантаження', error.message);
-    } else {
-      setEntries(data as Entry[]);
-    }
+    if (error) { Alert.alert('Помилка завантаження', error.message);
+    } else { setEntries(data as Entry[]); }
     setLoading(false);
   }, []);
 
@@ -140,14 +259,22 @@ export default function EntriesScreen() {
   
   const handleDeleteEntry = async (id: string) => {
     setEntries(prevEntries => prevEntries.filter(entry => entry.id !== id));
-    
+    const { error } = await supabase.from('daily_entries').delete().eq('id', id);
+    if (error) { Alert.alert('Помилка видалення', error.message); fetchEntries(); }
+  };
+
+  const handleUpdateNote = async (id: string, newNote: string) => {
+    setEntries(prevEntries => 
+      prevEntries.map(entry => 
+        entry.id === id ? { ...entry, note: newNote } : entry
+      )
+    );
     const { error } = await supabase
       .from('daily_entries')
-      .delete()
+      .update({ note: newNote })
       .eq('id', id);
-      
     if (error) {
-      Alert.alert('Помилка видалення', error.message);
+      Alert.alert('Помилка оновлення', error.message);
       fetchEntries();
     }
   };
@@ -165,8 +292,15 @@ export default function EntriesScreen() {
       <FlatList
         data={entries}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <EntryCard item={item} onDelete={handleDeleteEntry} />}
+        renderItem={({ item }) => (
+          <EntryCard 
+            item={item} 
+            onDelete={handleDeleteEntry} 
+            onUpdateNote={handleUpdateNote} 
+          />
+        )}
         contentContainerStyle={styles.listContainer}
+        keyboardShouldPersistTaps="handled"
         ListEmptyComponent={
           <View style={styles.placeholderContainer}>
             <Ionicons name="book-outline" size={60} color={COLORS.textSecondary} />
@@ -181,19 +315,21 @@ export default function EntriesScreen() {
   );
 }
 
+// 6. ОНОВЛЕНІ СТИЛІ
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
   centered: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   listContainer: {
     paddingHorizontal: 15,
     paddingVertical: 10,
-    minHeight: '100%', 
+    flexGrow: 1,
   },
   card: {
     backgroundColor: 'rgba(121, 85, 72, 0.05)',
@@ -225,8 +361,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Nunito_400Regular',
     color: COLORS.textSecondary,
   },
-  deleteButton: {
+  iconContainer: {
+    flexDirection: 'row',
+  },
+  // Замінюємо deleteButton на iconButton
+  iconButton: {
     padding: 5,
+    marginLeft: 10,
   },
   cardNote: {
     fontSize: 16,
@@ -234,6 +375,12 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     lineHeight: 22,
     paddingVertical: 5,
+  },
+  moreButton: {
+    fontSize: 14,
+    fontFamily: 'Nunito_600SemiBold',
+    color: COLORS.accent,
+    marginTop: 5,
   },
   divider: {
     height: 1,
@@ -253,6 +400,45 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Nunito_400Regular',
     color: COLORS.textSecondary,
+  },
+  noteInput: {
+    minHeight: 100,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    borderRadius: 10,
+    padding: 10,
+    fontFamily: 'Nunito_400Regular',
+    fontSize: 16,
+    color: COLORS.textPrimary,
+    borderWidth: 1,
+    borderColor: 'rgba(121, 85, 72, 0.2)',
+    textAlignVertical: 'top',
+  },
+  editControls: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 10,
+  },
+  cancelButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  cancelButtonText: {
+    fontFamily: 'Nunito_600SemiBold',
+    color: COLORS.textSecondary,
+    fontSize: 16,
+  },
+  saveButton: {
+    backgroundColor: COLORS.buttonBackground,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginLeft: 10,
+  },
+  saveButtonText: {
+    fontFamily: 'Nunito_600SemiBold',
+    color: COLORS.buttonText,
+    fontSize: 16,
   },
   placeholderContainer: {
     flex: 1, 

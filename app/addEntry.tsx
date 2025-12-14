@@ -16,6 +16,7 @@ import Animated, {
 import StarRating from '../components/StarRating';
 import { supabase } from '../supabaseConfig';
 
+// ... (Палітра COLORS, formatDateTime, questionPools, getRandomQuestion... все без змін)
 const COLORS = {
   background: '#FDF8F0',
   textPrimary: '#795548',
@@ -27,75 +28,40 @@ const COLORS = {
   starFilled: '#795548',
   starEmpty: 'rgba(121, 85, 72, 0.2)',
 };
-
 const formatDateTime = (date: Date) => {
   const optionsDate: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
   const optionsTime: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
   return `${date.toLocaleDateString('uk-UA', optionsDate)}, ${date.toLocaleTimeString('uk-UA', optionsTime)}`;
 };
-
 const questionPools = {
-  mood: [
-    "Наскільки спокійно ти почуваєшся всередині?",
-    "Який твій загальний емоційний фон сьогодні?",
-    "Наскільки гармонійно ти себе відчуваєш?",
-    "Наскільки легко тобі сьогодні було відпускати контроль?",
-    "Як би ти оцінив(ла) свій настрій?",
-  ],
-  energy: [
-    "Наскільки сповненим(ою) сил ти себе відчуваєш?",
-    "Як би ти оцінив(ла) свій рівень енергії?",
-    "Чи відчуваєш ти втому чи бадьорість?",
-    "Чи відчував(ла) ти сьогодні контакт зі своїми емоціями?",
-    "Чи вдавалося тобі помічати дрібниці, які приносять радість?",
-  ],
-  sleepQuality: [
-    "Наскільки добре ти спав(ла)?",
-    "Наскільки легко тобі було заснути сьогодні вночі?",
-    "Наскільки твій розум був спокійним перед сном?",
-    "Як би ти оцінив(ла) якість свого сну?",
-    "Наскільки глибоким і спокійним був твій сон?",
-  ],
-  anxiety: [
-    "Наскільки сильною була тривога чи неспокій?",
-    "Чи вдалося тобі зберегти спокій протягом дня?",
-    "Як би ти оцінив(ла) свій рівень стресу?",
-    "Чи відчуваєш ти довіру до життя зараз?",
-    "Чи зміг(ла) ти знайти хоча б короткий момент повного спокою?",
-  ],
-  gratitude: [
-    "Наскільки легко тобі згадати моменти вдячності за день?",
-    "Чи відчуваєш ти вдячність за сьогоднішній день?",
-    "Чи були сьогодні моменти, які змусили тебе посміхнутися?",
-    "Наскільки ти приймаєш себе таким(ою), яким(ою) є?",
-    "Чи можеш ти бути добрим(ою) до себе, навіть коли щось не виходить?",
-  ],
+  mood: [ "Наскільки спокійно ти почуваєшся всередині?", "Який твій загальний емоційний фон сьогодні?", "Наскільки гармонійно ти себе відчуваєш?", "Наскільки легко тобі сьогодні було відпускати контроль?", "Як би ти оцінив(ла) свій настрій?", ],
+  energy: [ "Наскільки сповненим(ою) сил ти себе відчуваєш?", "Як би ти оцінив(ла) свій рівень енергії?", "Чи відчуваєш ти втому чи бадьорість?", "Чи відчував(ла) ти сьогодні контакт зі своїми емоціями?", "Чи вдавалося тобі помічати дрібниці, які приносять радість?", ],
+  sleepQuality: [ "Наскільки добре ти спав(ла)?", "Наскільки легко тобі було заснути сьогодні вночі?", "Наскільки твій розум був спокійним перед сном?", "Як би ти оцінив(ла) якість свого сну?", "Наскільки глибоким і спокійним був твій сон?", ],
+  anxiety: [ "Наскільки сильною була тривога чи неспокій?", "Чи вдалося тобі зберегти спокій протягом дня?", "Як би ти оцінив(ла) свій рівень стресу?", "Чи відчуваєш ти довіру до життя зараз?", "Чи зміг(ла) ти знайти хоча б короткий момент повного спокою?", ],
+  gratitude: [ "Наскільки легко тобі згадати моменти вдячності за день?", "Чи відчуваєш ти вдячність за сьогоднішній день?", "Чи були сьогодні моменти, які змусили тебе посміхнутися?", "Наскільки ти приймаєш себе таким(ою), яким(ою) є?", "Чи можеш ти бути добрим(ою) до себе, навіть коли щось не виходить?", ],
 };
-
 const getRandomQuestion = (metric: keyof typeof questionPools) => {
   const pool = questionPools[metric];
   return pool[Math.floor(Math.random() * pool.length)];
 };
+// ... (Кінець блоку без змін)
 
 
 export default function AddEntryScreen() {
+  // ... (всі useState, анімації та useFocusEffect - без змін)
   const [entryText, setEntryText] = useState('');
   const [isTextSaved, setIsTextSaved] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
-
   const [mood, setMood] = useState(0);
   const [anxiety, setAnxiety] = useState(0);
   const [energy, setEnergy] = useState(0);
   const [sleepQuality, setSleepQuality] = useState(0);
   const [gratitude, setGratitude] = useState(0);
-
   const [moodQuestion, setMoodQuestion] = useState('');
   const [energyQuestion, setEnergyQuestion] = useState('');
   const [sleepQuestion, setSleepQuestion] = useState('');
   const [anxietyQuestion, setAnxietyQuestion] = useState('');
   const [gratitudeQuestion, setGratitudeQuestion] = useState('');
-
-
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const onPressIn = () => { scale.value = withTiming(0.95, { duration: 100 }); };
@@ -105,10 +71,8 @@ export default function AddEntryScreen() {
     useCallback(() => {
       const now = new Date();
       setCurrentDateTime(now);
-      
       setMoodQuestion(getRandomQuestion('mood'));
       setEnergyQuestion(getRandomQuestion('energy'));
-
       const morning = now.getHours() < 14;
       if (morning) {
         setSleepQuestion(getRandomQuestion('sleepQuality'));
@@ -116,7 +80,6 @@ export default function AddEntryScreen() {
         setAnxietyQuestion(getRandomQuestion('anxiety'));
         setGratitudeQuestion(getRandomQuestion('gratitude'));
       }
-
       setEntryText('');
       setIsTextSaved(false);
       setMood(0);
@@ -124,12 +87,13 @@ export default function AddEntryScreen() {
       setEnergy(0);
       setSleepQuality(0);
       setGratitude(0);
-
     }, [])
   );
+  // ... (Кінець блоку без змін)
 
   const isMorning = currentDateTime.getHours() < 14;
 
+  // ... (handleSaveText та handleSaveEntry - без змін)
   const handleSaveText = () => {
     if (!entryText.trim()) {
       Alert.alert('Порожній запис', 'Будь ласка, напиши щось про свій день.');
@@ -148,16 +112,13 @@ export default function AddEntryScreen() {
        Alert.alert('Не всі оцінки', 'Будь ласка, оціни свій стан за всіма критеріями.');
        return;
     }
-
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       Alert.alert('Помилка', 'Не вдалося визначити користувача.');
       router.replace('/login');
       return;
     }
-
     console.log('Attempting to save with user_id:', user.id);
-
     const entryData = {
       user_id: user.id,
       created_at: currentDateTime.toISOString(),
@@ -169,13 +130,10 @@ export default function AddEntryScreen() {
       sleep_quality: isMorning ? sleepQuality : null,
       gratitude: isMorning ? null : gratitude,
     };
-
     console.log("Saving entry:", entryData);
-
     const { error } = await supabase
       .from('daily_entries')
       .insert([entryData]);
-
     if (error) {
       Alert.alert('Помилка збереження', error.message);
     } else {
@@ -186,12 +144,15 @@ export default function AddEntryScreen() {
 
 
   return (
-    <View style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    // 1. Прибираємо 'View' та 'styles.container' звідси
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.keyboardView} // <--- 'keyboardView' тепер головний
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        {/* 2. Обгортаємо ScrollView у View style={{ flex: 1 }} */}
+        {/* Це дозволить ScrollView коректно стискатися */}
+        <View style={{ flex: 1 }}>
           <ScrollView
             contentContainerStyle={styles.scrollView}
             keyboardShouldPersistTaps="handled"
@@ -208,6 +169,11 @@ export default function AddEntryScreen() {
                   placeholderTextColor={COLORS.textSecondary}
                   value={entryText}
                   onChangeText={setEntryText}
+                  // 3. (Опціонально) Додаємо це, щоб при фокусі поле було видно
+                  // onFocus={(e) => {
+                  //   // @ts-ignore
+                  //   e.target.scrollIntoView({ behavior: 'smooth' });
+                  // }}
                 />
                 <Pressable
                   onPress={handleSaveText}
@@ -262,22 +228,20 @@ export default function AddEntryScreen() {
               </View>
             )}
           </ScrollView>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </View>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
   keyboardView: {
     flex: 1,
+    backgroundColor: COLORS.background, 
   },
   scrollView: {
-    flexGrow: 1,
+    flexGrow: 1, 
+    justifyContent: 'center', 
     alignItems: 'center',
     padding: 20,
     paddingTop: 40,
@@ -298,6 +262,7 @@ const styles = StyleSheet.create({
   textInput: {
     width: '100%',
     minHeight: 150,
+    maxHeight: 250, 
     backgroundColor: COLORS.inputBackground,
     borderRadius: 15,
     padding: 15,
