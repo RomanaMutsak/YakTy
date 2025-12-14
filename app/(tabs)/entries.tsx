@@ -12,7 +12,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-// 1. Імпортуємо 'Animated' з 'react-native-reanimated'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -23,7 +22,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import StarRating from '../../components/StarRating';
 import { supabase } from '../../supabaseConfig';
 
-// ... (Палітра COLORS та інтерфейс Entry - без змін)
 const COLORS = {
   background: '#FDF8F0',
   textPrimary: '#795548',
@@ -45,11 +43,6 @@ interface Entry {
   anxiety?: number | null;
   gratitude?: number | null;
 }
-// ... (Кінець блоку без змін)
-
-
-// --- 2. ОНОВЛЕНО: Компонент AnimatedIconButton ---
-// (Ми анімуємо 'Pressable', а не 'View', щоб уникнути помилки)
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -82,9 +75,7 @@ const AnimatedIconButton = ({ onPress, iconName, color }: {
   );
 };
 
-
-// --- 3. Оновлюємо компонент EntryCard ---
-const MAX_NOTE_LENGTH = 120; // <--- Ліміт символів
+const MAX_NOTE_LENGTH = 120; 
 
 const EntryCard = ({ item, onDelete, onUpdateNote }: { 
   item: Entry, 
@@ -100,7 +91,6 @@ const EntryCard = ({ item, onDelete, onUpdateNote }: {
   const formattedTime = date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
   const isMorning = item.entry_type === 'morning';
 
-  // Функція видалення (вона вже була, але тепер вона 100% тут)
   const confirmDelete = () => {
     Alert.alert(
       "Видалити запис?",
@@ -112,7 +102,6 @@ const EntryCard = ({ item, onDelete, onUpdateNote }: {
     );
   };
 
-  // ... (Логіка handleSaveEdit та handleCancelEdit - без змін)
   const handleSaveEdit = () => {
     Keyboard.dismiss();
     if (editedNote.trim() === item.note) {
@@ -128,7 +117,6 @@ const EntryCard = ({ item, onDelete, onUpdateNote }: {
     setIsEditing(false);
   };
 
-  // 4. ОНОВЛЕНО: Рендеримо текст (повертаємо 'substring')
   const renderNote = () => {
     if (isEditing) {
       return (
@@ -142,13 +130,11 @@ const EntryCard = ({ item, onDelete, onUpdateNote }: {
       );
     }
     
-    // Перевіряємо, чи текст "довгий"
     const isLongText = item.note.length > MAX_NOTE_LENGTH;
 
     if (isLongText && !isExpanded) {
       return (
         <>
-          {/* Показуємо лише перші N символів */}
           <Text style={styles.cardNote}>
             {item.note.substring(0, MAX_NOTE_LENGTH)}...
           </Text>
@@ -159,7 +145,6 @@ const EntryCard = ({ item, onDelete, onUpdateNote }: {
       );
     }
 
-    // Повний текст (або короткий)
     return (
       <>
         <Text style={styles.cardNote}>{item.note}</Text>
@@ -172,8 +157,7 @@ const EntryCard = ({ item, onDelete, onUpdateNote }: {
       </>
     );
   };
-  
-  // ... (renderRatingsOrControls - без змін)
+
   const renderRatingsOrControls = () => {
     if (isEditing) {
       return (
@@ -208,7 +192,6 @@ const EntryCard = ({ item, onDelete, onUpdateNote }: {
         <View style={styles.iconContainer}>
           {!isEditing && (
             <>
-              {/* 5. Використовуємо нові анімовані кнопки */}
               <AnimatedIconButton
                 onPress={() => setIsEditing(true)}
                 iconName="pencil-outline"
@@ -233,7 +216,6 @@ const EntryCard = ({ item, onDelete, onUpdateNote }: {
 
 
 export default function EntriesScreen() {
-  // ... (весь код EntriesScreen залишається БЕЗ ЗМІН)
   const [loading, setLoading] = useState(true);
   const [entries, setEntries] = useState<Entry[]>([]);
 
@@ -315,7 +297,6 @@ export default function EntriesScreen() {
   );
 }
 
-// 6. ОНОВЛЕНІ СТИЛІ
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -364,7 +345,6 @@ const styles = StyleSheet.create({
   iconContainer: {
     flexDirection: 'row',
   },
-  // Замінюємо deleteButton на iconButton
   iconButton: {
     padding: 5,
     marginLeft: 10,

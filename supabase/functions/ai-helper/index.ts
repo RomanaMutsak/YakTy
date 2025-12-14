@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-// Промпт для ШІ (без змін)
+// Промпт для ШІ 
 const chatPrompt = `
   Ти - "Як ти?", турботливий і підтримуючий помічник у щоденнику емоцій. 
   Твоя мета - не вирішувати проблеми, а вислуховувати та ставити м'які запитання.
@@ -29,13 +29,9 @@ serve(async (req) => {
     const API_KEY = Deno.env.get("GOOGLE_API_KEY");
     if (!API_KEY) throw new Error("Немає API ключа");
 
-    // 2. ОСНОВНЕ ВИПРАВЛЕННЯ:
-    // Використовуємо 'v1beta' (як і раніше)
-    // АЛЕ з назвою моделі з твого списку: 'gemini-2.5-flash-lite'
     const GOOGLE_API_URL = 
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${API_KEY}`;
 
-    // 3. Створюємо тіло запиту
     const requestBody = {
       contents: [
         { parts: [{ text: chatPrompt + message }] }
@@ -43,7 +39,6 @@ serve(async (req) => {
       safetySettings: safetySettings,
     };
 
-    // 4. Виконуємо запит
     const res = await fetch(GOOGLE_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -57,11 +52,9 @@ serve(async (req) => {
     }
 
     const data = await res.json();
-    
-    // 5. Витягуємо текст відповіді
+
     const text = data.candidates[0].content.parts[0].text;
 
-    // 6. Повертаємо відповідь у додаток
     return new Response(
       JSON.stringify({ reply: text }),
       { headers: { "Content-Type": "application/json" } }

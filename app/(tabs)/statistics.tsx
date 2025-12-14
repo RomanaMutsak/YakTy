@@ -16,7 +16,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import StarRating from '../../components/StarRating';
 import { supabase } from '../../supabaseConfig';
 
-// ... (Палітра COLORS - без змін)
 const COLORS = {
   background: '#FDF8F0',
   textPrimary: '#795548',
@@ -28,7 +27,6 @@ const COLORS = {
   inputBackground: 'rgba(121, 85, 72, 0.08)',
 };
 
-// 1. ДОДАНО: "Перекладач" днів тижня
 const dayOfWeekMap = [
   'Нд', // 0
   'Пн', // 1
@@ -46,7 +44,6 @@ interface ChartDataType {
   datasets: { data: number[] }[];
 }
 
-// ... (getInsightMessage - без змін)
 function getInsightMessage(mood: number, anxiety: number): string {
   if (mood === 0 && anxiety === 0) return "Продовжуй вести щоденник, щоб побачити аналіз.";
   if (mood >= 4 && anxiety <= 2) {
@@ -66,7 +63,6 @@ function getInsightMessage(mood: number, anxiety: number): string {
 
 
 export default function StatisticsScreen() {
-  // ... (всі useState - без змін)
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<'week' | 'month'>('week');
   const [entries, setEntries] = useState<any[]>([]);
@@ -88,7 +84,6 @@ export default function StatisticsScreen() {
     if (timeRange === 'week') { dateFrom.setDate(dateFrom.getDate() - 7); }
     else { dateFrom.setDate(dateFrom.getDate() - 30); }
     
-    // ... (запит до Supabase - без змін)
     const { data: fetchedEntries, error } = await supabase
       .from('daily_entries')
       .select('created_at, mood, energy, sleep_quality, anxiety')
@@ -104,20 +99,18 @@ export default function StatisticsScreen() {
     
     if (fetchedEntries && fetchedEntries.length >= 1) {
       
-      // 2. ОНОВЛЕНО: Логіка створення 'labels'
       const labels = fetchedEntries.map(entry => {
         const date = new Date(entry.created_at);
         if (timeRange === 'week') {
           return dayOfWeekMap[date.getDay()]; // "Пн", "Вт" і т.д.
         } else {
-          return `${date.getDate()}.${date.getMonth() + 1}`; // "23.10"
+          return `${date.getDate()}.${date.getMonth() + 1}`; 
         }
       });
       
       const moodData = fetchedEntries.map(entry => entry.mood);
       const energyData = fetchedEntries.map(entry => entry.energy);
       
-      // ОНОВЛЕНО: Логіка 'labels' для Сну
       const sleepEntries = fetchedEntries.filter(e => e.sleep_quality != null);
       const sleepLabels = sleepEntries.map(entry => {
         const date = new Date(entry.created_at);
@@ -125,7 +118,6 @@ export default function StatisticsScreen() {
       });
       const sleepData = sleepEntries.map(e => e.sleep_quality);
       
-      // ОНОВЛЕНО: Логіка 'labels' для Тривожності
       const anxietyEntries = fetchedEntries.filter(e => e.anxiety != null);
       const anxietyLabels = anxietyEntries.map(entry => {
         const date = new Date(entry.created_at);
@@ -133,7 +125,6 @@ export default function StatisticsScreen() {
       });
       const anxietyData = anxietyEntries.map(e => e.anxiety);
 
-      // ... (решта логіки: setChartData, setAverages, setInsight - без змін)
       setMoodChartData(labels.length >= 2 ? { labels, datasets: [{ data: moodData }] } : { labels: [], datasets: [{ data: [] }] });
       setEnergyChartData(labels.length >= 2 ? { labels, datasets: [{ data: energyData }] } : { labels: [], datasets: [{ data: [] }] });
       setSleepChartData(sleepLabels.length >= 2 ? { labels: sleepLabels, datasets: [{ data: sleepData }] } : { labels: [], datasets: [{ data: [] }] });
@@ -154,7 +145,6 @@ export default function StatisticsScreen() {
       });
       setInsight(getInsightMessage(avgMood, avgAnxiety));
     } else {
-      // ... (блок 'else' - без змін)
       setMoodChartData({ labels: [], datasets: [{ data: [] }] });
       setEnergyChartData({ labels: [], datasets: [{ data: [] }] });
       setSleepChartData({ labels: [], datasets: [{ data: [] }] });
@@ -163,7 +153,7 @@ export default function StatisticsScreen() {
       setInsight('');
     }
     setLoading(false);
-  }, [timeRange]); // <--- 'timeRange' є залежністю, тому все буде оновлюватися
+  }, [timeRange]); 
 
   useFocusEffect(
     useCallback(() => {
@@ -172,7 +162,6 @@ export default function StatisticsScreen() {
   );
 
   const chartConfig = {
-    // ... (конфігурація графіка - без змін)
     backgroundColor: COLORS.background,
     backgroundGradientFrom: COLORS.background,
     backgroundGradientTo: COLORS.background,
@@ -326,7 +315,6 @@ export default function StatisticsScreen() {
   );
 }
 
-// ... (Стилі - без змін)
 const styles = StyleSheet.create({
   container: {
     flex: 1,

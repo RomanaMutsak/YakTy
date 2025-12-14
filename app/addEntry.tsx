@@ -16,7 +16,6 @@ import Animated, {
 import StarRating from '../components/StarRating';
 import { supabase } from '../supabaseConfig';
 
-// ... (Палітра COLORS, formatDateTime, questionPools, getRandomQuestion... все без змін)
 const COLORS = {
   background: '#FDF8F0',
   textPrimary: '#795548',
@@ -44,11 +43,9 @@ const getRandomQuestion = (metric: keyof typeof questionPools) => {
   const pool = questionPools[metric];
   return pool[Math.floor(Math.random() * pool.length)];
 };
-// ... (Кінець блоку без змін)
 
 
 export default function AddEntryScreen() {
-  // ... (всі useState, анімації та useFocusEffect - без змін)
   const [entryText, setEntryText] = useState('');
   const [isTextSaved, setIsTextSaved] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
@@ -89,11 +86,9 @@ export default function AddEntryScreen() {
       setGratitude(0);
     }, [])
   );
-  // ... (Кінець блоку без змін)
 
   const isMorning = currentDateTime.getHours() < 14;
 
-  // ... (handleSaveText та handleSaveEntry - без змін)
   const handleSaveText = () => {
     if (!entryText.trim()) {
       Alert.alert('Порожній запис', 'Будь ласка, напиши щось про свій день.');
@@ -144,14 +139,11 @@ export default function AddEntryScreen() {
 
 
   return (
-    // 1. Прибираємо 'View' та 'styles.container' звідси
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.keyboardView} // <--- 'keyboardView' тепер головний
+      style={styles.keyboardView}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        {/* 2. Обгортаємо ScrollView у View style={{ flex: 1 }} */}
-        {/* Це дозволить ScrollView коректно стискатися */}
         <View style={{ flex: 1 }}>
           <ScrollView
             contentContainerStyle={styles.scrollView}
@@ -169,11 +161,6 @@ export default function AddEntryScreen() {
                   placeholderTextColor={COLORS.textSecondary}
                   value={entryText}
                   onChangeText={setEntryText}
-                  // 3. (Опціонально) Додаємо це, щоб при фокусі поле було видно
-                  // onFocus={(e) => {
-                  //   // @ts-ignore
-                  //   e.target.scrollIntoView({ behavior: 'smooth' });
-                  // }}
                 />
                 <Pressable
                   onPress={handleSaveText}

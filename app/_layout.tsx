@@ -1,9 +1,8 @@
 import { Nunito_300Light, Nunito_400Regular, Nunito_600SemiBold, useFonts } from '@expo-google-fonts/nunito';
 import { SplashScreen, Stack } from 'expo-router';
 import React, { useEffect } from 'react';
-import { GestureHandlerRootView } from 'react-native-gesture-handler'; // (Якщо ти її повернув, залиш)
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-// 1. Визначимо твої кольори (щоб не дублювати)
 const COLORS = {
   background: '#FDF8F0',
   textPrimary: '#795548',
@@ -30,20 +29,18 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      {/* 2. Додаємо 'screenOptions' до Stack */}
       <Stack
         screenOptions={{
           headerStyle: {
-            backgroundColor: COLORS.background, // Колір фону заголовка
+            backgroundColor: COLORS.background, 
           },
-          headerTintColor: COLORS.textPrimary, // Колір тексту та стрілки "Назад"
+          headerTintColor: COLORS.textPrimary, 
           headerTitleStyle: {
-            fontFamily: 'Nunito_600SemiBold', // Шрифт заголовка
+            fontFamily: 'Nunito_600SemiBold', 
           },
-          headerShadowVisible: false, // Прибираємо тінь/лінію під заголовком
+          headerShadowVisible: false, 
         }}
       >
-        {/* Всі ці екрани тепер автоматично отримають новий стиль */}
         <Stack.Screen name="index" options={{ headerShown: false, title: 'вітання'  }} />
         <Stack.Screen name="register" options={{ title: 'Реєстрація' }} />
         <Stack.Screen name="login" options={{ title: 'Вхід' }} />

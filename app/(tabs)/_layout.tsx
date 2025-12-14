@@ -60,7 +60,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      {/* 4. Вкладка "Чат" (НОВА) */}
+      {/* 4. Вкладка "Чат" */}
       <Tabs.Screen
         name="chat"
         options={{

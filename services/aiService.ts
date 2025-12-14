@@ -2,7 +2,6 @@ import { supabase } from '../supabaseConfig';
 
 export async function getAIResponse(message: string): Promise<string> {
   try {
-    // 1. Виклик "хмарної" функції 'ai-helper'
     const { data, error } = await supabase.functions.invoke('ai-helper', {
       body: { message: message }, 
     });
@@ -11,7 +10,6 @@ export async function getAIResponse(message: string): Promise<string> {
       throw error; 
     }
 
-    // 2. Повернення відповіді від функції
     return data.reply;
 
   } catch (error) {

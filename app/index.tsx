@@ -67,7 +67,6 @@ export default function WelcomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.mainContent}>
-        {/* 6. Прибрали іконку */}
         <Animated.Text style={[styles.title, titleAnimatedStyle]}>
           Як ти?
         </Animated.Text>
@@ -77,7 +76,6 @@ export default function WelcomeScreen() {
       </View>
 
       <Animated.View style={[styles.footer, footerAnimatedStyle]}>
-        {/* ... (код кнопок без змін) ... */}
         <Pressable
           onPress={() => router.push('/register')}
           onPressIn={onPrimaryPressIn}
